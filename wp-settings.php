@@ -181,7 +181,7 @@ final class Settings {
 	 * @return void
 	 */
 	protected function setups() {
-		$this->fields = new WPSettingsFields( get_settings_errors() );
+		$this->fields = new Fields( get_settings_errors() );
 	}
 
 	/**
