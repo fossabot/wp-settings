@@ -25,7 +25,7 @@ namespace NineCodes\WPSettings;
  * @since 1.0.0
  * @since 2.1.0 - Class renamed.
  */
-class WPSettingsFields {
+class Fields {
 
 	/**
 	 * Validated settings errors
