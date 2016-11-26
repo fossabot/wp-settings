@@ -151,9 +151,9 @@ final class Settings {
 	 *
 	 * @param string $opts The option key name.
 	 */
-	public function __construct( $opts ) {
+	public function __construct( $option_slug = '' ) {
 
-		$this->opts = $opts;
+		$this->option_slug = $option_slug;
 		$this->path_dir = plugin_dir_path( __FILE__ );
 
 		$this->requires();
@@ -163,7 +163,7 @@ final class Settings {
 	/**
 	 * Load required files.
 	 *
-     * @since 2.0.0
+	 * @since 2.0.0
 	 * @access protected
 	 *
 	 * @return void
@@ -175,7 +175,7 @@ final class Settings {
 	/**
 	 * Run the setups.
 	 *
-     * @since 2.0.0
+	 * @since 2.0.0
 	 * @access protected
 	 *
 	 * @return void
@@ -199,15 +199,15 @@ final class Settings {
 		$this->screen = trim( sanitize_title( $screen ) );
 
 		// Debug strings don't use gettext functions for translation.
-		if ( ! class_exists( 'WPSettingsFields' ) ) {
-			$this->debug .= "Error: class WPSettingsFields doesn't exist<br/>";
+		if ( ! class_exists( 'NineCodes\WPSettings\Fields' ) ) {
+			$this->debug .= "Error: class Fields doesn't exist<br/>";
 		}
 
 		if ( '' === $this->screen ) {
 			$this->debug .= "Error: parameter 'screen' not provided in init()<br/>";
 		}
 
-		$this->debug .= apply_filters( "{$this->opts}_debug", $this->debug, $this->pages );
+		$this->debug .= apply_filters( "{$this->screen}_debug", $this->debug, $this->pages );
 
 		if ( $this->debug ) {
 			return $this->valid_pages = false; // Don't display the form and navigation.
@@ -221,13 +221,13 @@ final class Settings {
 		}
 
 		// Array of fields that needs the 'label_for' parameter (add_settings_field()).
-		$this->label_for = apply_filters( "{$this->opts}_label_for", $this->label_for );
+		$this->label_for = apply_filters( "{$this->screen}_label_for", $this->label_for );
 
 		// Special field with type.
-		$this->field_scripts = apply_filters( "{$this->opts}_field_scripts", array() );
+		$this->field_scripts = apply_filters( "{$this->screen}_field_scripts", array() );
 
 		// Special field with type.
-		$this->field_styles = apply_filters( "{$this->opts}_field_styles", array() );
+		$this->field_styles = apply_filters( "{$this->screen}_field_styles", array() );
 
 		// Get Current ad min page
 		$this->current_page = $this->get_current_admin_page();
@@ -249,8 +249,7 @@ final class Settings {
 			$this->load_styles = array_unique( $this->load_styles );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 		}
-	} // admin_init()
-
+	}
 
 	/**
 	 * Adds setting sections
@@ -275,8 +274,8 @@ final class Settings {
 
 			$page = $this->multiform ? $section['id'] : $this->current_page['id'];
 
-			$page = "{$this->opts}_{$page}";
-			$id   = "{$this->opts}_{$section['id']}";
+			$page = "{$this->option_slug}_{$page}";
+			$id   = "{$this->option_slug}_{$section['id']}";
 
 			add_settings_section( $id, $title, $description, $page );
 
@@ -342,8 +341,8 @@ final class Settings {
 					$this->load_scripts[ $field['id'] ] = $this->field_scripts[ $args['type'] ];
 				}
 
-				if ( isset( $args['attr']['data-load-script'] ) ) {
-					$this->load_scripts[ $field['id'] ] = $args['attr']['data-load-script'];
+				if ( isset( $args['attr']['data-enqueue-script'] ) ) {
+					$this->load_scripts[ $field['id'] ] = $args['attr']['data-enqueue-script'];
 				}
 
 				if ( key_exists( $args['type'], $this->field_styles ) ) {
@@ -362,7 +361,7 @@ final class Settings {
 			// Ability to add fields with an action hook.
 			if ( ! method_exists( $this->fields, 'callback_' . $field['type'] ) ) {
 				$args['callback'] = $field['type'];
-				$args['page_hook'] = $this->opts;
+				$args['page_hook'] = $this->screen;
 				$field['type'] = 'extra_field';
 			}
 
@@ -400,8 +399,8 @@ final class Settings {
 					$page['id'] = count( $page['sections'] ) > 1 ? $section['id'] : $page['id'];
 				}
 
-				$group = "{$this->opts}_{$page['id']}";
-				$option = "{$this->opts}_{$section['id']}";
+				$group = "{$this->option_slug}_{$page['id']}";
+				$option = "{$this->option_slug}_{$section['id']}";
 
 				if ( isset( $section['validate_callback'] ) && $section['validate_callback'] ) {
 					register_setting( $group, $option, $section['validate_callback'] );
@@ -426,7 +425,7 @@ final class Settings {
 		$settings = array();
 
 		if ( ! empty( $section ) ) {
-			return get_option( "{$this->opts}_{$section}" );
+			return get_option( "{$this->option_slug}_{$section}" );
 		}
 
 		foreach ( ( array ) $this->pages as $page ) {
@@ -439,7 +438,7 @@ final class Settings {
 					continue;
 				}
 
-				$option = get_option( "{$this->opts}_{$section['id']}" );
+				$option = get_option( "{$this->option_slug}_{$section['id']}" );
 
 				if ( $option ) {
 					$settings[ $section['id'] ] = $option;
@@ -620,7 +619,8 @@ final class Settings {
 		$screen = get_current_screen();
 
 		if ( $screen->id === $this->screen ) {
-			do_action( "{$this->opts}_admin_enqueue_scripts", $this->load_scripts );
+
+			do_action( "{$this->screen}_enqueue_scripts", $this->load_scripts );
 		}
 	}
 
@@ -637,7 +637,7 @@ final class Settings {
 		$screen = get_current_screen();
 
 		if ( $screen->id === $this->screen ) {
-			do_action( "{$this->opts}_admin_enqueue_styles", $this->load_styles );
+			do_action( "{$this->screen}_enqueue_styles", $this->load_styles );
 		}
 	}
 
@@ -652,7 +652,7 @@ final class Settings {
 	 */
 	public function render_section_description( $section ) {
 		foreach ( $this->current_page['sections'] as $setting ) {
-			if ( $this->opts . '_' . $setting['id'] === $section['id'] ) {
+			if ( $this->option_slug . '_' . $setting['id'] === $section['id'] ) {
 				echo '<p>' . wp_kses_post( $setting['description'] ) . '</p>';
 			}
 		}
@@ -761,10 +761,10 @@ final class Settings {
 				echo $title;
 
 				// Add additional fields.
-				echo apply_filters( "{$this->opts}_form_fields", '', $form['id'], $form );
+				echo apply_filters( "{$this->screen}_form_fields", '', $form['id'], $form );
 
-				settings_fields( $this->opts . '_' . $form['id'] );
-				do_settings_sections( $this->opts . '_' . $form['id'] );
+				settings_fields( $this->option_slug . '_' . $form['id'] );
+				do_settings_sections( $this->option_slug . '_' . $form['id'] );
 
 				$submit = ( isset( $form['submit'] ) && $form['submit'] ) ? $form['submit'] : '';
 
@@ -784,6 +784,6 @@ final class Settings {
 	}
 
 	public function install() {
-		$install = new Install( $this->pages, $this->opts );
+		$install = new Install( $this->pages, $this->option_slug );
 	}
 }

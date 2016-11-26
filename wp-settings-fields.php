@@ -226,9 +226,10 @@ class Fields {
 	 * @return void
 	 */
 	final public function callback_extra_field( $args ) {
+
 		if ( isset( $args['callback'] ) && $args['callback'] ) {
 			if ( isset( $args['page_hook'] ) && $args['page_hook'] ) {
-				do_action( "{$args['page_hook']}_add_extra_field", $args );
+				do_action( "{$args['page_hook']}_extra_field", $args );
 			}
 		}
 	}
