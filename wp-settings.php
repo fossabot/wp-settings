@@ -1,22 +1,41 @@
 <?php
 /**
- * WPSettings
+ * Plugin Name: WP Settings
+ * Plugin URI: https://github.com/ninecodes/social-manager
+ * Description: Classes to easily add plugin pages using the WordPress Settings API.
+ * Version: 1.2.0
+ * Author: NineCodes
+ * Author URI: https://github.com/ninecodes
+ * License: GPL-2.0+
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  *
- * @version 2.1.0
- * @author Kees Meijer
- * @author Thoriq Firdaus <tfirdaus@outlook.com>
- * @link https://github.com/keesiemeijer/WP-Settings
- * @license http://www.gnu.org/licenses/gpl-2.0.html
+ * Requires at least: 4.5
+ * Tested up to: 4.7
  *
- * @since 1.0.0
- * @since 2.1.0 - Add namespace.
- *              - Adopt SemVer for version numbering.
- *              - Rename class.
+ * Text Domain: wp-settings
+ * Domain Path: /languages
  *
- * @package Settings
+ * Copyright (c) 2017 NineCodes (https://ninecodes.com/)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * @author Kees Meijer <keesie.meijer@gmail.com>
+ * @package WPSettings
  */
 
 namespace NineCodes\WPSettings;
+
+if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
+	die; // Abort.
+}
 
 /**
  * Class for registering settings and sections and for display of the settings form(s).
@@ -25,6 +44,7 @@ namespace NineCodes\WPSettings;
  * @since 2.1.0 Class renamed.
  */
 final class Settings {
+
 
 	/**
 	 * The settings directory.
@@ -135,13 +155,13 @@ final class Settings {
 	private $multiform;
 
 	/**
-	 * valid admin pages and fields arrays.
+	 * Valid admin pages and fields arrays.
 	 *
 	 * @since 2.0.0
 	 * @access private
 	 * @var boolean
 	 */
-	private $valid_pages;
+	private $valid_pages = true;
 
 	/**
 	 * Constructor
@@ -149,12 +169,12 @@ final class Settings {
 	 * @since 2.0.0
 	 * @access public
 	 *
-	 * @param string $opts The option key name.
+	 * @param string $option_slug The option key slug.
 	 */
 	public function __construct( $option_slug = '' ) {
 
 		$this->option_slug = $option_slug;
-		$this->path_dir = plugin_dir_path( __FILE__ );
+		$this->path_dir    = plugin_dir_path( __FILE__ );
 
 		$this->requires();
 		$this->setups();
@@ -169,6 +189,7 @@ final class Settings {
 	 * @return void
 	 */
 	protected function requires() {
+
 		require_once( $this->path_dir . 'wp-settings-fields.php' );
 	}
 
@@ -181,7 +202,15 @@ final class Settings {
 	 * @return void
 	 */
 	protected function setups() {
-		$this->fields = new Fields( get_settings_errors() );
+
+		/**
+		 * Fetch settings errors registered by `add_settings_error()`.
+		 *
+		 * @var array
+		 */
+		$errors = get_settings_errors();
+
+		$this->fields = new Fields( $errors );
 	}
 
 	/**
@@ -190,69 +219,96 @@ final class Settings {
 	 * @since 2.0.0
 	 * @access public
 	 *
-	 * @param array  $pages  Array with admin pages.
-	 * @param string $screen Unique plugin admin page hook suffix.
+	 * @param string $screen The unique slug of the plugin setting page.
+	 * @param array  $pages  The array of fields and inputs to register in the setting page.
 	 */
 	public function init( $screen = '', array $pages ) {
 
-		$this->pages = $pages;
-		$this->screen = trim( sanitize_title( $screen ) );
+		$this->pages  = $pages;
+		$this->screen = trim( sanitize_key( $screen ) );
 
-		// Debug strings don't use gettext functions for translation.
-		if ( ! class_exists( 'NineCodes\WPSettings\Fields' ) ) {
-			$this->debug .= "Error: class Fields doesn't exist<br/>";
+		/**
+		 * ================================================================
+		 * Debugging Message
+		 * Show message in the setting page in case of error.
+		 *
+		 * NOTE Debug strings don't use gettext functions for translation.
+		 * ================================================================
+		 */
+
+		if ( ! class_exists( 'NineCodes\\WPSettings\\Fields' ) ) {
+			$this->debug .= "Error: The class `Fields` doesn't exist.";
 		}
 
-		if ( '' === $this->screen ) {
-			$this->debug .= "Error: parameter 'screen' not provided in init()<br/>";
+		if ( empty( $this->screen ) ) {
+			$this->debug .= "Error: The parameter `$screen` is not provided in `init()` method.";
+		}
+
+		if ( empty( $this->pages ) ) {
+			$this->debug .= "Error: The parameter `$pages` is not provided or empty; no settings and inputs to register in this Setting page.";
 		}
 
 		$this->debug .= apply_filters( "{$this->screen}_debug", $this->debug, $this->pages );
 
-		if ( $this->debug ) {
-			return $this->valid_pages = false; // Don't display the form and navigation.
+		if ( ! empty( $this->debug ) ) {
+			$this->valid_pages = false;
+			return;
 		}
-
-		// Passed validation (required to show form and navigation).
-		$this->valid_pages = true;
 
 		if ( isset( $this->current_page['multiform'] ) && $this->current_page['multiform'] ) {
 			$this->multiform = ( count( $this->current_page['sections'] ) > 1 ) ? true : false;
 		}
 
-		// Array of fields that needs the 'label_for' parameter (add_settings_field()).
+		/**
+		 * Fields that needs the `label_for` arguments, which sets a label so that
+		 * the setting title can be clicked on to focus on the field.
+		 *
+		 * @link https://codex.wordpress.org/Function_Reference/add_settings_field#With_Label
+		 *
+		 * @var array
+		 */
 		$this->label_for = apply_filters( "{$this->screen}_label_for", $this->label_for );
 
-		// Special field with type.
+		/**
+		 * JavaScripts handles to load for fields
+		 *
+		 * @var array
+		 */
 		$this->field_scripts = apply_filters( "{$this->screen}_field_scripts", array() );
 
-		// Special field with type.
+		/**
+		 * Stylesheets handles to load for fields
+		 *
+		 * @var array
+		 */
 		$this->field_styles = apply_filters( "{$this->screen}_field_styles", array() );
 
-		// Get Current ad min page
+		/**
+		 * Get input fields of the current admin page or
+		 * current tab of the admin page.
+		 *
+		 * @var array
+		 */
 		$this->current_page = $this->get_current_admin_page();
 
-		// Add setting sections.
 		$this->add_settings_sections();
-
-		// Register all the settings.
 		$this->register_settings();
 
-		// Only load javascript if it's needed for the current admin page
-		if ( ! empty( $this->load_scripts ) ) {
+		if ( ! empty( $this->load_scripts ) ) { // Load JavaScripts, if it's needed in the current admin page.
+
 			$this->load_scripts = array_unique( $this->load_scripts );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		}
 
-		// Only load styles if it's needed for the current admin page.
-		if ( ! empty( $this->load_styles ) ) {
+		if ( ! empty( $this->load_styles ) ) { // Load stylesheets, if it's needed in the current admin page.
+
 			$this->load_styles = array_unique( $this->load_styles );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 		}
 	}
 
 	/**
-	 * Adds setting sections
+	 * The method to add Setting sections.
 	 *
 	 * @since 2.0.0
 	 * @access private
@@ -262,6 +318,7 @@ final class Settings {
 	private function add_settings_sections() {
 
 		foreach ( $this->current_page['sections'] as $section ) {
+
 			$description = '__return_false';
 			if ( isset( $section['description'] ) && ! empty( $section['description'] ) ) {
 				$description = array( $this, 'render_section_description' );
@@ -272,19 +329,27 @@ final class Settings {
 				$title = $section['title'];
 			}
 
-			$page = $this->multiform ? $section['id'] : $this->current_page['id'];
+			$page_slug = $this->multiform ? $section['id'] : $this->current_page['id'];
 
-			$page = "{$this->option_slug}_{$page}";
-			$id   = "{$this->option_slug}_{$section['id']}";
+			$option_key = "{$this->option_slug}_{$page_slug}";
+			$section_id = "{$this->option_slug}_{$section['id']}";
 
-			add_settings_section( $id, $title, $description, $page );
+			add_settings_section( $section_id, $title, $description, $option_key );
 
 			if ( isset( $section['fields'] ) && ! empty( $section['fields'] ) ) {
-				$this->add_settings_fields( $id, $section['fields'], $page ); // Add fields to sections.
+				$this->add_settings_fields( $section_id, $section['fields'], $option_key ); // Add fields to sections.
 			}
 
-			$this->debug .= '' === $this->debug ? 'Database option(s) created for this page:<br/>' : '';
-			$this->debug .= "Database option: {$id}<br/>";
+			/**
+			 * ================================================================
+			 * Debugging Message
+			 * Show message in the setting page in case of error.
+			 *
+			 * NOTE Debug strings don't use gettext functions for translation.
+			 * ================================================================
+			 */
+			$this->debug .= '' === $this->debug ? 'Database option(s) created for this page:' : '';
+			$this->debug .= "Database Option: {$section_id}";
 		}
 	}
 
@@ -295,13 +360,11 @@ final class Settings {
 	 * @access public
 	 *
 	 * @param string $sections_id  ID of section to add fields to.
-	 * @param array  $fields       Array with section fields
-	 * @param string $page_id      Page id.
-	 * @param bool   $use_defaults Use default values for the settings fields.
+	 * @param array  $fields       Array fields to add in the section.
+	 * @param string $page_id      Page ID.
 	 */
 	private function add_settings_fields( $sections_id, $fields, $page_id ) {
 
-		$opt_defaults = array();
 		$defaults = array(
 			'section' => $sections_id,
 			'id' => '',
@@ -318,22 +381,16 @@ final class Settings {
 			'_type' => '',
 		);
 
-		// Check if database option exist (use defaults if it doesn't).
-		$use_defaults = ( false === get_option( $sections_id ) ) ? true : false;
-
 		foreach ( $fields as $field ) {
-			// Field (rows) can be added by external scripts.
+
 			$multiple = isset( $field['fields'] ) && $field['fields'] ? true : false;
 			$options  = $multiple ? (array) $field['fields'] : array( $field );
 
-			foreach ( $options as $key => $opt ) {
-				$args = wp_parse_args( $opt, $defaults );
+			foreach ( $options as $key => $option ) {
 
-				$args['default'] = $use_defaults ? $args['default'] : '';
+				$args = wp_parse_args( $option, $defaults );
 
-				$opt_defaults[ $opt['id'] ] = $args['default'];
-
-				if ( in_array( $args['type'], $this->label_for ) ) {
+				if ( in_array( $args['type'], $this->label_for, true ) ) {
 					$args['label_for'] = "{$sections_id}_{$args['id']}";
 				}
 
@@ -341,12 +398,12 @@ final class Settings {
 					$this->load_scripts[ $field['id'] ] = $this->field_scripts[ $args['type'] ];
 				}
 
-				if ( isset( $args['attr']['data-enqueue-script'] ) ) {
-					$this->load_scripts[ $field['id'] ] = $args['attr']['data-enqueue-script'];
-				}
-
 				if ( key_exists( $args['type'], $this->field_styles ) ) {
 					$this->load_styles[ $field['id'] ] = $this->field_styles[ $args['type'] ];
+				}
+
+				if ( isset( $args['attr']['data-enqueue-script'] ) && ! empty( $args['attr']['data-enqueue-script'] ) ) {
+					$this->load_scripts[ $field['id'] ] = $args['attr']['data-enqueue-script'];
 				}
 
 				if ( $multiple ) {
@@ -358,7 +415,6 @@ final class Settings {
 				$args = $field;
 			}
 
-			// Ability to add fields with an action hook.
 			if ( ! method_exists( $this->fields, 'callback_' . $field['type'] ) ) {
 				$args['callback'] = $field['type'];
 				$args['page_hook'] = $this->screen;
@@ -376,15 +432,10 @@ final class Settings {
 				);
 			}
 		}
-
-		// add the option or validation errors show twice on the first submit (todo: Why?).
-		if ( $use_defaults ) {
-			add_option( $sections_id, $opt_defaults );
-		}
 	}
 
 	/**
-	 * Registers settings
+	 * Registers Settings
 	 *
 	 * @since 2.0.0
 	 * @access protected
@@ -394,12 +445,14 @@ final class Settings {
 	protected function register_settings() {
 
 		foreach ( $this->pages as $page ) {
+
 			foreach ( $page['sections'] as $section ) {
+
 				if ( isset( $page['multiform'] ) && $page['multiform'] ) {
 					$page['id'] = count( $page['sections'] ) > 1 ? $section['id'] : $page['id'];
 				}
 
-				$group = "{$this->option_slug}_{$page['id']}";
+				$group  = "{$this->option_slug}_{$page['id']}";
 				$option = "{$this->option_slug}_{$section['id']}";
 
 				if ( isset( $section['validate_callback'] ) && $section['validate_callback'] ) {
@@ -412,7 +465,7 @@ final class Settings {
 	}
 
 	/**
-	 * Gets all settings from all sections
+	 * Gets all settings from all sections.
 	 *
 	 * @since 2.0.0
 	 * @access public
@@ -428,12 +481,14 @@ final class Settings {
 			return get_option( "{$this->option_slug}_{$section}" );
 		}
 
-		foreach ( ( array ) $this->pages as $page ) {
+		foreach ( (array) $this->pages as $page ) {
+
 			if ( ! isset( $page['sections'] ) ) {
 				continue;
 			}
 
 			foreach ( $page['sections'] as $section ) {
+
 				if ( ! isset( $section['id'] ) ) {
 					continue;
 				}
@@ -460,6 +515,7 @@ final class Settings {
 	public function get_current_admin_page() {
 
 		foreach ( (array) $this->pages as $page ) {
+
 			if ( isset( $_GET['tab'] ) && $_GET['tab'] ) {
 				if ( ( $_GET['tab'] === $page['id'] ) || ( $_GET['tab'] === $page['slug'] ) ) {
 					$current_page = $page;
@@ -467,8 +523,7 @@ final class Settings {
 			}
 		}
 
-		// Set the first settings page as current if it's not a tab.
-		if ( empty( $current_page ) ) {
+		if ( empty( $current_page ) ) { // Set the first settings page as current if it's not a tab.
 			$current_page = $this->pages[0];
 		}
 
@@ -485,6 +540,7 @@ final class Settings {
 	 * @return array Admin pages array with the page added.
 	 */
 	public function add_page( $page ) {
+
 		return $this->pages[] = $page;
 	}
 
@@ -494,13 +550,15 @@ final class Settings {
 	 * @since 2.0.0
 	 * @access public
 	 *
-	 * @param array $pages Array with pages.
-	 * @return array Admin pages array with the pages added.
+	 * @param array $pages List pages to add in the Setting page.
+	 * @return array
 	 */
 	public function add_pages( $pages ) {
+
 		foreach ( $pages as $page ) {
 			$this->add_page( $page );
 		}
+
 		return $this->pages;
 	}
 
@@ -510,18 +568,19 @@ final class Settings {
 	 * @since 2.0.0
 	 * @access public
 	 *
-	 * @param string $page    Page id.
+	 * @param string $page_slug Page (tab) slug.
 	 * @param array  $section Section array.
 	 * @return array Admin pages array with the section added.
 	 */
-	public function add_section( $page, $section ) {
+	public function add_section( $page_slug, $section ) {
 
-		foreach ( $this->pages as $key => $_page ) {
-			if ( $page !== $_page['id'] ) {
+		foreach ( $this->pages as $key => $page ) {
+
+			if ( $page_slug !== $page['id'] ) {
 				continue;
 			}
 
-			if ( isset( $this->pages[ $key ][ $page ]['sections'] ) ) {
+			if ( isset( $this->pages[ $key ][ $page_slug ]['sections'] ) ) {
 				$this->pages[ $key ]['sections'] = array();
 			}
 
@@ -537,14 +596,16 @@ final class Settings {
 	 * @since 2.0.0
 	 * @access public
 	 *
-	 * @param array $string   Page id
-	 * @param array $sections Array with sections.
+	 * @param array $page_slug  The uniqu page (tab) slug.
+	 * @param array $sections   The section in the page (tab).
 	 * @return array Admin pages array with the sections added.
 	 */
-	public function add_sections( $page, $sections ) {
+	public function add_sections( $page_slug, $sections ) {
+
 		foreach ( $sections as $section ) {
-			$this->pages = $this->add_section( $page, $section );
+			$this->pages = $this->add_section( $page_slug, $section );
 		}
+
 		return $this->pages;
 	}
 
@@ -600,9 +661,11 @@ final class Settings {
 	 * @return array Admin pages array with the fields added.
 	 */
 	public function add_fields( $page, $section, $fields ) {
+
 		foreach ( $fields as $field ) {
 			$this->pages = $this->add_field( $page, $section, $field );
 		}
+
 		return $this->pages;
 	}
 
@@ -619,7 +682,6 @@ final class Settings {
 		$screen = get_current_screen();
 
 		if ( $screen->id === $this->screen ) {
-
 			do_action( "{$this->screen}_enqueue_scripts", $this->load_scripts );
 		}
 	}
@@ -651,7 +713,9 @@ final class Settings {
 	 * @return void
 	 */
 	public function render_section_description( $section ) {
+
 		foreach ( $this->current_page['sections'] as $setting ) {
+
 			if ( $this->option_slug . '_' . $setting['id'] === $section['id'] ) {
 				echo '<p>' . wp_kses_post( $setting['description'] ) . '</p>';
 			}
@@ -664,19 +728,18 @@ final class Settings {
 	 * @since 2.0.0
 	 * @access public
 	 *
-	 * @param string $plugin_title Plugin title.
-	 * @param string $tab_id       Page id. Manually set the active tab.
+	 * @param array  $args 	  Header arguments.
+	 * @param string $page_slug  Page ID. Manually set the active tab.
 	 * @return void
 	 */
-	public function render_header( array $args, $tab_id = false ) {
+	public function render_header( array $args, $page_slug = false ) {
 
 		$title = isset( $args['title'] ) && true === $args['title'] ? esc_html( get_admin_page_title() ) : '';
 		$title = $title ?  "<h1>{$title}</h1>" : $title;
 
-		echo $title;
+		echo wp_kses( $title, array( 'h1' => true ) );
 
 		$page_title_count = 0;
-
 		foreach ( $this->pages as $page ) {
 			if ( isset( $page['title'] ) && $page['title'] ) {
 				++$page_title_count;
@@ -685,10 +748,12 @@ final class Settings {
 
 		$html = '';
 
-		$current = $this->current_page;
-		$page_ids = wp_list_pluck( $this->pages, 'id' );
-		$cur_tab_id = $tab_id ? (string) $tab_id : $current['id'];
-		$cur_tab_id = in_array( $cur_tab_id, $page_ids ) ? $cur_tab_id : $current['id'];
+		$current    = $this->current_page;
+		$page_slugs = wp_list_pluck( $this->pages, 'id' );
+
+		$current_page_slug = $page_slug ? (string) $page_slug : $current['id'];
+		$current_page_slug = in_array( $current_page_slug, $page_slugs, true ) ? $current_page_slug : $current['id'];
+
 		$i = 0;
 
 		foreach ( $this->pages as $page ) {
@@ -697,21 +762,19 @@ final class Settings {
 					$html .= ( 0 === $i ) ? '<nav class="nav-tab-wrapper">' : '';
 
 					$active = '';
-					if ( $cur_tab_id === $page['id'] ) {
+					if ( $current_page_slug === $page['id'] ) {
 						$active = ' nav-tab-active';
 					}
 
-					// Get the url of the current settings page.
-					$tab_url = remove_query_arg( array( 'tab', 'settings-updated' ) );
+					$page_url = remove_query_arg( array( 'tab', 'settings-updated' ) ); // Get the url of the current settings page.
 
-					// Add query arg 'tab' if it's not the first settings page.
-					if ( $this->pages[0]['id'] !== $page['id'] ) {
-						$tab_url = add_query_arg( 'tab', $page['slug'], $tab_url );
+					if ( $this->pages[0]['id'] !== $page['id'] ) { // Add query arg 'tab' if it's not the first settings page.
+						$page_url = add_query_arg( 'tab', $page['slug'], $page_url );
 					}
 
 					$html .= sprintf(
 						'<a href="%1$s" class="nav-tab%2$s" id="%3$s-tab">%4$s</a>',
-						esc_url( $tab_url ),
+						esc_url( $page_url ),
 						$active,
 						esc_attr( $page['id'] ),
 						$page['title']
@@ -720,7 +783,7 @@ final class Settings {
 					$html .= ( ++$i === $page_title_count ) ? '</nav>' : '';
 				}
 
-				if ( $page_title_count === 1 ) {
+				if ( 1 === $page_title_count ) {
 					if ( isset( $current['title'] ) && $current['title'] === $page['title'] ) {
 						$html .= '<h2>' . $page['title'] . '</h2>';
 						break;
@@ -729,7 +792,7 @@ final class Settings {
 			}
 		}
 
-		echo $html;
+		echo wp_kses_post( $html );
 	}
 
 	/**
@@ -749,19 +812,22 @@ final class Settings {
 		$page = $this->current_page;
 
 		if ( ! empty( $page ) ) {
-			$ids   = wp_list_pluck( $page['sections'], 'id' );
+
 			$forms = $this->multiform ? $page['sections'] : array( $page );
 
 			foreach ( $forms as $form ) {
+
 				echo '<form method="post" action="options.php">';
 
-				$title = isset( $page['title'] ) && ! empty( $page['title'] ) ? esc_html__( $page['title'] ) : '';
+				$title = isset( $page['title'] ) && ! empty( $page['title'] ) ? esc_html( $page['title'] ) : '';
 				$title = $title ? "<h1 class='screen-reader-text'>{$title}</h1>" : '';
 
-				echo $title;
-
-				// Add additional fields.
-				echo apply_filters( "{$this->screen}_form_fields", '', $form['id'], $form );
+				echo wp_kses( $title, array(
+					'h1' => array(
+						'class' => true,
+					),
+				) );
+				echo wp_kses_post( apply_filters( "{$this->screen}_form_fields", '', $form['id'], $form ) );
 
 				settings_fields( $this->option_slug . '_' . $form['id'] );
 				do_settings_sections( $this->option_slug . '_' . $form['id'] );
@@ -781,9 +847,5 @@ final class Settings {
 				echo '</form>';
 			}
 		}
-	}
-
-	public function install() {
-		$install = new Install( $this->pages, $this->option_slug );
 	}
 }
