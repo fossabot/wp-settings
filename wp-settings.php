@@ -318,6 +318,10 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		 */
 		private function add_settings_sections() {
 
+			if ( empty( $this->current_page['sections'] ) ) {
+				return;
+			}
+
 			foreach ( $this->current_page['sections'] as $section ) {
 				$description = '__return_false';
 				if ( isset( $section['description'] ) && ! empty( $section['description'] ) ) {
@@ -448,6 +452,11 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		protected function register_settings() {
 
 			foreach ( $this->pages as $page ) {
+
+				if ( empty( $page['sections'] ) ) {
+					continue;
+				}
+
 				foreach ( $page['sections'] as $section ) {
 
 					if ( isset( $page['multiform'] ) && $page['multiform'] ) {
