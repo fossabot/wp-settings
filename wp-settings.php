@@ -721,11 +721,11 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		 * @since 2.0.0
 		 * @access public
 		 *
-		 * @param array  $args    Header arguments.
-		 * @param string $page_slug  Page ID. Manually set the active tab.
+		 * @param array  $args    	Header arguments.
+		 * @param string $page_slug Page ID. Manually set the active tab.
 		 * @return void
 		 */
-		public function render_header( array $args, $page_slug = false ) {
+		public function render_header( array $args, $page_slug = '' ) {
 
 			$title = isset( $args['title'] ) && true === $args['title'] ? esc_html( get_admin_page_title() ) : '';
 			$title = $title ?  "<h1>{$title}</h1>" : $title;
