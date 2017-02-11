@@ -405,14 +405,6 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 						$this->load_styles[ $field['id'] ] = $this->field_styles[ $args['type'] ];
 					}
 
-					if ( isset( $args['attr']['data-enqueue-script'] ) && ! empty( $args['attr']['data-enqueue-script'] ) ) {
-						$this->load_scripts[ $field['id'] ] = $args['attr']['data-enqueue-script'];
-					}
-
-					if ( isset( $args['attr']['data-enqueue-style'] ) && ! empty( $args['attr']['data-enqueue-style'] ) ) {
-						$this->load_styles[ $field['id'] ] = $args['attr']['data-enqueue-style'];
-					}
-
 					if ( $multiple ) {
 						$field['fields'][ $key ] = $args;
 					}
