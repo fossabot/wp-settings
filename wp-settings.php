@@ -536,16 +536,26 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		 * @since 2.0.0
 		 * @access public
 		 *
-		 * @param array $page Page array.
+		 * @param array $pages Page array.
 		 * @return array Admin pages array with the page added.
 		 */
-		public function add_page( $page ) {
+		public function add_page( array $pages ) {
 
-			return $this->pages[] = $page;
+			$page = array();
+
+			foreach ( $pages as $key => $title ) {
+				$page[] = array(
+					'id' => sanitize_key( $key ),
+					'slug' => sanitize_key( $key ),
+					'title' => wp_kses( $title, array() ),
+				);
+			}
+
+			return $this->pages = $page;
 		}
 
 		/**
-		 * Adds multiple admin pages.
+		 * Adds multiple admin pages (Alias).
 		 *
 		 * @since 2.0.0
 		 * @access public
@@ -553,13 +563,8 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		 * @param array $pages List pages to add in the Setting page.
 		 * @return array
 		 */
-		public function add_pages( $pages ) {
-
-			foreach ( $pages as $page ) {
-				$this->add_page( $page );
-			}
-
-			return $this->pages;
+		public function add_pages( array $pages ) {
+			return $this->add_page( $pages );
 		}
 
 		/**
