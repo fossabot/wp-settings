@@ -396,10 +396,9 @@ if ( ! class_exists( '\NineCodes\WPSettings\Fields' ) ) {
 		 * @access protected
 		 *
 		 * @param string|array $args  Arguments of a setting field.
-		 * @param string       $class Size of field (class name).
 		 * @return array All arguments and attributes
 		 */
-		final protected function get_arguments( $args = '', $class = '' ) {
+		final protected function get_arguments( $args = '' ) {
 
 			// Escape section, id, and options used in attributes.
 			$args['section'] = esc_attr( $args['section'] );
@@ -413,32 +412,37 @@ if ( ! class_exists( '\NineCodes\WPSettings\Fields' ) ) {
 				$args['options'] = $options;
 			}
 
-			// Additional parameters.
+			// Set the default output.
 			$attr_string = '';
-			$defaults = $attr = array();
+
+			$attr = array();
 
 			if ( isset( $args['attr'] ) && $args['attr'] ) {
 				$attr = $args['attr'];
 			}
 
 			if ( 'textarea' === $args['type'] ) { // Set defaults for a textarea field.
-				$defaults = array( 'rows' => '5', 'cols' => '55' );
+				$attr = wp_parse_args( $attr, array( 'rows' => '5', 'cols' => '55' ) );
 			}
 
-			// TODO: Add action to add additional defaults.
-			$attr['class'] = isset( $attr['class'] ) ? trim( $attr['class'] ) : '';
+			/**
+			 * Store extra clasess from the user definitions.
+			 *
+			 * TODO: Add action to add additional defaults.
+			 *
+			 * @var string
+			 */
+			$classes = isset( $attr['class'] ) ? trim( $attr['class'] ) : '';
 
-			if ( isset( $args['size'] ) &&  $args['size'] ) {
+			$attr['class'] = sprintf( ' field-%1$s', str_replace( '_', '-', $args['type'] ) );
+
+			if ( isset( $args['size'] ) && $args['size'] ) {
 				if ( 'text' === $args['type'] || 'textarea' === $args['type'] ) {
 					$attr['class'] .= sprintf( ' %1$s-%2$s', $args['size'], $args['type'] );
 				}
 			}
 
-			if ( $class ) {
-				if ( ! preg_match( '/\s' . preg_quote( (string) $class, '/' ) . '\s/', $attr['class'] ) ) {
-					$attr['class'] = ' ' . (string) $class;
-				}
-			}
+			$attr['class'] .= " {$classes}";
 
 			if ( '' === $attr['class'] ) {
 				unset( $attr['class'] );
@@ -450,6 +454,7 @@ if ( ! class_exists( '\NineCodes\WPSettings\Fields' ) ) {
 			}
 
 			$args['attr'] = $attr_string;
+
 			return $args;
 		}
 
