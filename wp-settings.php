@@ -536,22 +536,22 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		 * @since 2.0.0
 		 * @access public
 		 *
-		 * @param array $pages Page array.
+		 * @param array $arr Page array.
 		 * @return array Admin pages array with the page added.
 		 */
-		public function add_page( array $pages ) {
+		public function add_page( array $arr ) {
 
-			$page = array();
+			$pages = array();
 
-			foreach ( $pages as $key => $title ) {
-				$page[] = array(
+			foreach ( $arr as $key => $value ) {
+				$pages[] = array(
 					'id' => sanitize_key( $key ),
 					'slug' => sanitize_key( $key ),
-					'title' => wp_kses( $title, array() ),
+					'title' => wp_kses( $value, array() ),
 				);
 			}
 
-			return $this->pages = $page;
+			return $this->pages = $pages;
 		}
 
 		/**
@@ -560,11 +560,24 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		 * @since 2.0.0
 		 * @access public
 		 *
-		 * @param array $pages List pages to add in the Setting page.
+		 * @param array $arr List pages to add in the Setting page.
 		 * @return array
 		 */
-		public function add_pages( array $pages ) {
-			return $this->add_page( $pages );
+		public function add_pages( array $arr ) {
+
+			$pages = array();
+
+			foreach ( $arr as $key => $value ) {
+
+				$slug = str_replace( '-', '_', sanitize_key( $key ) );
+				$title = wp_kses( $value, array() );
+
+				$pages[ $slug ] = $title;
+			}
+
+			$this->pages = $this->add_page( $arr );
+
+			return $pages;
 		}
 
 		/**
