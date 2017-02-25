@@ -592,6 +592,11 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		 */
 		public function add_section( $page_slug, $section ) {
 
+			$s = array();
+			foreach ( $section as $id => $s ) {
+				$s = array_merge( array( 'id' => $id ), $s );
+			}
+
 			foreach ( $this->pages as $key => $page ) {
 				if ( $page_slug !== $page['id'] ) {
 					continue;
@@ -601,7 +606,7 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 					$this->pages[ $key ]['sections'] = array();
 				}
 
-				$this->pages[ $key ]['sections'][] = $section;
+				$this->pages[ $key ]['sections'][] = $s;
 			}
 
 			return $this->pages;
@@ -619,8 +624,8 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		 */
 		public function add_sections( $page_slug, $sections ) {
 
-			foreach ( $sections as $section ) {
-				$this->pages = $this->add_section( $page_slug, $section );
+			foreach ( $sections as $id => $section ) {
+				$this->pages = $this->add_section( $page_slug, array( $id => $section ) );
 			}
 
 			return $this->pages;
