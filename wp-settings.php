@@ -592,9 +592,9 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		 */
 		public function add_section( $page_slug, $section ) {
 
-			$s = array();
+			$add_section = array();
 			foreach ( $section as $id => $s ) {
-				$s = array_merge( array( 'id' => $id ), $s );
+				$add_section = array_merge( array( 'id' => $id ), $s );
 			}
 
 			foreach ( $this->pages as $key => $page ) {
@@ -606,7 +606,7 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 					$this->pages[ $key ]['sections'] = array();
 				}
 
-				$this->pages[ $key ]['sections'][] = $s;
+				$this->pages[ $key ]['sections'][] = $add_section;
 			}
 
 			return $this->pages;
@@ -644,6 +644,11 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		 */
 		public function add_field( $page_slug, $section_slug, $fields ) {
 
+			$add_field = array();
+			foreach ( $fields as $name => $f ) {
+				$add_field = array_merge( array( 'id' => $name ), $f );
+			}
+
 			foreach ( $this->pages as $p => $page ) {
 				if ( $page_slug !== $page['id'] ) {
 					continue;
@@ -664,7 +669,7 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 						$this->pages[ $p ]['sections'][ $s ]['fields'] = array();
 					}
 
-					$this->pages[ $p ]['sections'][ $s ]['fields'][] = $fields;
+					$this->pages[ $p ]['sections'][ $s ]['fields'][] = $add_field;
 				}
 			}
 
@@ -684,8 +689,8 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		 */
 		public function add_fields( $page, $section, $fields ) {
 
-			foreach ( $fields as $field ) {
-				$this->pages = $this->add_field( $page, $section, $field );
+			foreach ( $fields as $name => $field ) {
+				$this->pages = $this->add_field( $page, $section, array( $name => $field ) );
 			}
 
 			return $this->pages;
