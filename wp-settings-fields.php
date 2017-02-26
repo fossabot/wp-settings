@@ -225,7 +225,7 @@ if ( ! class_exists( '\NineCodes\WPSettings\Fields' ) ) {
 
 			$id = esc_attr( $args['id'] );
 			$section = esc_attr( $args['section'] );
-			$value = array_map( 'esc_attr', array_values( (array) $this->get_option( $args ) ) );
+			$value = (array) $this->get_option( $args );
 
 			$count = count( $args['options'] );
 			$elem = '<fieldset>';
@@ -234,7 +234,7 @@ if ( ! class_exists( '\NineCodes\WPSettings\Fields' ) ) {
 			foreach ( (array) $args['options'] as $option => $label ) {
 
 				$error = $this->get_setting_error( $option, ' style="border: 1px solid red; padding: 2px 1em 2px 0; "' );
-				$checked = in_array( $option, $value, true ) ? ' checked="checked" ' : '';
+				$checked = isset( $value[ $option ] ) && 'on' === $value[ $option ] ? ' checked="checked" ' : '';
 
 				$option = esc_attr( $option );
 				$label = esc_attr( $label );
