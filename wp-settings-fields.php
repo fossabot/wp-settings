@@ -239,7 +239,13 @@ if ( ! class_exists( '\NineCodes\WPSettings\Fields' ) ) {
 				$option = esc_attr( $option );
 				$label = esc_attr( $label );
 
-				$input = sprintf( '<input type="checkbox" id="%1$s_%2$s_%3$s" name="%1$s[%2$s][%3$s]" value="%3$s"%4$s%5$s />', $section, $id, $option, $checked, $args['attr'] );
+				$input = sprintf( '<input type="checkbox" id="%1$s_%2$s_%3$s" name="%1$s[%2$s][%3$s]" value="on"%4$s%5$s />',
+					$section,
+					$id,
+					$option,
+					$checked,
+					$args['attr']
+				);
 
 				$elem .= sprintf( '<label for="%1$s_%2$s_%4$s"%6$s>%3$s %5$s</label>', $section, $id, $input, $option, $label, $error );
 				$elem .= isset( $args['row_after'][ $option ] ) && $args['row_after'][ $option ] ? $args['row_after'][ $option ] : '';
