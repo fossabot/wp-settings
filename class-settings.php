@@ -28,7 +28,7 @@
  * @package WPSettings
  */
 
-namespace NineCodes\Settings;
+namespace NineCodes\WPSettings;
 
 if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
 	die; // Abort.
@@ -38,7 +38,7 @@ if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
  * The `WPSettings` library might be used in the other plugins,
  * so ensure whether the Settings class has not been defined.
  */
-if ( ! class_exists( '\NineCodes\Settings\Settings' ) ) {
+if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 
 	/**
 	 * Class for registering settings and sections and for display of the settings form(s).
@@ -192,7 +192,7 @@ if ( ! class_exists( '\NineCodes\Settings\Settings' ) ) {
 		 */
 		protected function requires() {
 
-			require_once( $this->path_dir . 'wp-settings-fields.php' );
+			require_once( $this->path_dir . 'class-fields.php' );
 		}
 
 		/**
