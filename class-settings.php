@@ -28,7 +28,7 @@
  * @package WPSettings
  */
 
-namespace NineCodes\WPSettings;
+namespace NineCodes\Settings;
 
 if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
 	die; // Abort.
@@ -38,7 +38,7 @@ if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
  * The `WPSettings` library might be used in the other plugins,
  * so ensure whether the Settings class has not been defined.
  */
-if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
+if ( ! class_exists( '\NineCodes\Settings\Settings' ) ) {
 
 	/**
 	 * Class for registering settings and sections and for display of the settings form(s).
@@ -430,7 +430,7 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 						$args
 					);
 				}
-			}
+			}// End foreach().
 		}
 
 		/**
@@ -551,7 +551,9 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 				);
 			}
 
-			return $this->pages = $pages;
+			$this->pages = $pages;
+
+			return $pages;
 		}
 
 		/**
@@ -594,7 +596,9 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 
 			$add_section = array();
 			foreach ( $section as $id => $s ) {
-				$add_section = array_merge( array( 'id' => $id ), $s );
+				$add_section = array_merge( array(
+					'id' => $id,
+				), $s );
 			}
 
 			foreach ( $this->pages as $key => $page ) {
@@ -625,7 +629,9 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		public function add_sections( $page_slug, $sections ) {
 
 			foreach ( $sections as $id => $section ) {
-				$this->pages = $this->add_section( $page_slug, array( $id => $section ) );
+				$this->pages = $this->add_section( $page_slug, array(
+					$id => $section,
+				) );
 			}
 
 			return $this->pages;
@@ -646,7 +652,9 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 
 			$add_field = array();
 			foreach ( $fields as $name => $f ) {
-				$add_field = array_merge( array( 'id' => $name ), $f );
+				$add_field = array_merge( array(
+					'id' => $name,
+				), $f );
 			}
 
 			foreach ( $this->pages as $p => $page ) {
@@ -690,7 +698,9 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 		public function add_fields( $page, $section, $fields ) {
 
 			foreach ( $fields as $name => $field ) {
-				$this->pages = $this->add_field( $page, $section, array( $name => $field ) );
+				$this->pages = $this->add_field( $page, $section, array(
+					$name => $field,
+				) );
 			}
 
 			return $this->pages;
@@ -763,7 +773,9 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 			$title = isset( $args['title'] ) && true === $args['title'] ? esc_html( get_admin_page_title() ) : '';
 			$title = $title ?  "<h1>{$title}</h1>" : $title;
 
-			echo wp_kses( $title, array( 'h1' => true ) );
+			echo wp_kses( $title, array(
+				'h1' => true,
+			) );
 
 			$page_title_count = 0;
 			foreach ( $this->pages as $page ) {
@@ -865,12 +877,14 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 					$text = isset( $submit['text'] )  ? $submit['text'] : null;
 					$type = isset( $submit['$type'] ) ? $submit['text'] : 'primary';
 					$name = isset( $submit['$name'] ) ? $submit['name'] : 'submit';
-					$other_attributes = array( 'id' => $form['id'] );
+					$other_attributes = array(
+						'id' => $form['id'],
+					);
 
 					submit_button( $text, $type, $name, true, $other_attributes );
 					echo '</form>';
 				}
-			}
+			}// End if().
 		}
 	}
 } // End if().

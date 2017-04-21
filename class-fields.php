@@ -14,7 +14,7 @@
  * @package WPSettings\Fields
  */
 
-namespace NineCodes\WPSettings;
+namespace NineCodes\Settings;
 
 if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
 	die; // Abort.
@@ -24,7 +24,7 @@ if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
  * The `WPSettings` library might be used in the other plugins,
  * so ensure whether the Settings class has not been defined.
  */
-if ( ! class_exists( '\NineCodes\WPSettings\Fields' ) ) {
+if ( ! class_exists( '\NineCodes\Settings\Fields' ) ) {
 
 	/**
 	 * Class to register input fields in the WordPress setting page.
@@ -428,7 +428,10 @@ if ( ! class_exists( '\NineCodes\WPSettings\Fields' ) ) {
 			}
 
 			if ( 'textarea' === $args['type'] ) { // Set defaults for a textarea field.
-				$attr = wp_parse_args( $attr, array( 'rows' => '5', 'cols' => '55' ) );
+				$attr = wp_parse_args( $attr, array(
+					'rows' => '5',
+					'cols' => '55',
+				) );
 			}
 
 			/**
@@ -494,4 +497,4 @@ if ( ! class_exists( '\NineCodes\WPSettings\Fields' ) ) {
 			return ( isset( $args['default'] ) ) ? $args['default'] : '';
 		}
 	}
-}
+}// End if().
