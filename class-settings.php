@@ -652,6 +652,11 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 
 			$add_field = array();
 			foreach ( $fields as $name => $f ) {
+
+				if ( ! is_array( $f ) ) {
+					continue;
+				}
+
 				$add_field = array_merge( array(
 					'id' => $name,
 				), $f );
