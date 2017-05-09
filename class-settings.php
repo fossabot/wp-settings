@@ -295,17 +295,11 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 			$this->add_settings_sections();
 			$this->register_settings();
 
-			if ( ! empty( $this->load_scripts ) ) { // Load JavaScripts, if it's needed in the current admin page.
+			$this->load_scripts = array_unique( $this->load_scripts );
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
-				$this->load_scripts = array_unique( $this->load_scripts );
-				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-			}
-
-			if ( ! empty( $this->load_styles ) ) { // Load stylesheets, if it's needed in the current admin page.
-
-				$this->load_styles = array_unique( $this->load_styles );
-				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-			}
+			$this->load_styles = array_unique( $this->load_styles );
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 		}
 
 		/**
