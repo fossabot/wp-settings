@@ -877,8 +877,9 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 					}
 
 					$text = isset( $submit['text'] )  ? $submit['text'] : null;
-					$type = isset( $submit['$type'] ) ? $submit['text'] : 'primary';
-					$name = isset( $submit['$name'] ) ? $submit['name'] : 'submit';
+					$type = isset( $submit['type'] ) ? $submit['type'] : 'primary';
+					$name = isset( $submit['name'] ) ? $submit['name'] : 'submit';
+
 					$other_attributes = array(
 						'id' => $form['id'],
 					);
