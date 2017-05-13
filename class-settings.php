@@ -862,10 +862,13 @@ if ( ! class_exists( '\NineCodes\WPSettings\Settings' ) ) {
 							'class' => true,
 						),
 					));
-					echo wp_kses_post( apply_filters( "{$this->screen}_form_fields", '', $form['id'], $form ) );
+
+					do_action( "before_{$this->screen}_form", $form['id'], $form );
 
 					settings_fields( $this->option_slug . '_' . $form['id'] );
 					do_settings_sections( $this->option_slug . '_' . $form['id'] );
+
+					do_action( "after_{$this->screen}_form", $form['id'], $form );
 
 					$submit = ( isset( $form['submit'] ) && $form['submit'] ) ? $form['submit'] : '';
 
