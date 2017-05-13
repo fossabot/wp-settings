@@ -443,7 +443,7 @@ if ( ! class_exists( '\NineCodes\WPSettings\Fields' ) ) {
 			 */
 			$classes = isset( $attr['class'] ) ? trim( $attr['class'] ) : '';
 
-			$attr['class'] = sprintf( ' field-%1$s', str_replace( '_', '-', $args['type'] ) );
+			$attr['class'] = sprintf( ' field field-%1$s', str_replace( '_', '-', $args['type'] ) );
 
 			if ( isset( $args['size'] ) && $args['size'] ) {
 				if ( 'text' === $args['type'] || 'textarea' === $args['type'] ) {
