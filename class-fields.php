@@ -14,7 +14,7 @@
  * @package WPSettings\Fields
  */
 
-namespace NineCodes\WPSettings;
+namespace NineCodes\SettingsAPI;
 
 if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
 	die; // Abort.
@@ -24,7 +24,7 @@ if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
  * The `WPSettings` library might be used in the other plugins,
  * so ensure whether the Settings class has not been defined.
  */
-if ( ! class_exists( '\NineCodes\WPSettings\Fields' ) ) {
+if ( ! class_exists( '\NineCodes\SettingsAPI\Fields' ) ) {
 
 	/**
 	 * Class to register input fields in the WordPress setting page.
