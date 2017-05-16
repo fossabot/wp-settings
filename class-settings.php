@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: WP Settings
+ * Plugin Name: WP Settings API
  * Plugin URI: https://github.com/ninecodes/social-manager
  * Description: Classes to easily add plugin pages using the WordPress Settings API.
  * Version: 1.2.0
@@ -25,20 +25,20 @@
  * GNU General Public License for more details.
  *
  * @author Kees Meijer <keesie.meijer@gmail.com>
- * @package WPSettings
+ * @package WPSettingsAPI
  */
 
-namespace NineCodes\SettingsAPI;
+namespace NineCodes\WPSettingsAPI;
 
 if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
 	die; // Abort.
 }
 
 /**
- * The `WPSettings` library might be used in the other plugins,
+ * The `WPSettingsAPI` library might be used in the other plugins,
  * so ensure whether the Settings class has not been defined.
  */
-if ( ! class_exists( '\NineCodes\SettingsAPI\Settings' ) ) {
+if ( ! class_exists( '\NineCodes\WPSettingsAPI\Settings' ) ) {
 
 	/**
 	 * Class for registering settings and sections and for display of the settings form(s).

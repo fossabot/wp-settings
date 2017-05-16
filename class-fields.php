@@ -11,20 +11,20 @@
  * @since 2.1.0 - Add namespace.
  *              - Adopt SemVer for version numbering.
  *
- * @package WPSettings\Fields
+ * @package WPSettingsAPI\Fields
  */
 
-namespace NineCodes\SettingsAPI;
+namespace NineCodes\WPSettingsAPI;
 
 if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
 	die; // Abort.
 }
 
 /**
- * The `WPSettings` library might be used in the other plugins,
+ * The `WP_Settings_API` library might be used in the other plugins,
  * so ensure whether the Settings class has not been defined.
  */
-if ( ! class_exists( '\NineCodes\SettingsAPI\Fields' ) ) {
+if ( ! class_exists( '\NineCodes\WPSettingsAPI\Fields' ) ) {
 
 	/**
 	 * Class to register input fields in the WordPress setting page.
