@@ -25,20 +25,20 @@
  * GNU General Public License for more details.
  *
  * @author Kees Meijer <keesie.meijer@gmail.com>
- * @package WPSettingsAPI
+ * @package WP\Settings
  */
 
-namespace NineCodes\WPSettingsAPI;
+namespace NineCodes\WP\Settings;
 
 if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
 	die; // Abort.
 }
 
 /**
- * The `WPSettingsAPI` library might be used in the other plugins,
+ * The `WP\Settings` library might be used in the other plugins,
  * so ensure whether the Settings class has not been defined.
  */
-if ( ! class_exists( '\NineCodes\WPSettingsAPI\Settings' ) ) {
+if ( ! class_exists( '\NineCodes\WP\Settings\Settings' ) ) {
 
 	/**
 	 * Class for registering settings and sections and for display of the settings form(s).
@@ -237,7 +237,7 @@ if ( ! class_exists( '\NineCodes\WPSettingsAPI\Settings' ) ) {
 			 * NOTE Debug strings don't use gettext functions for translation.
 			 * ================================================================
 			 */
-			if ( ! class_exists( 'NineCodes\\WPSettings\\Fields' ) ) {
+			if ( ! class_exists( 'NineCodes\WP\Settings\Fields' ) ) {
 				$this->debug .= "Error: The class `Fields` doesn't exist.\n";
 			}
 
