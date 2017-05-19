@@ -24,7 +24,7 @@ if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
  * The `WP_Settings_API` library might be used in the other plugins,
  * so ensure whether the Settings class has not been defined.
  */
-if ( ! class_exists( '\NineCodes\WP\Settings\Fields' ) ) {
+if ( ! class_exists( '\NineCodes\WP\Settings\Fields' ) ) :
 
 	/**
 	 * Class to register input fields in the WordPress setting page.
@@ -497,4 +497,4 @@ if ( ! class_exists( '\NineCodes\WP\Settings\Fields' ) ) {
 			return ( isset( $args['default'] ) ) ? $args['default'] : '';
 		}
 	}
-}// End if().
+endif; // End if().

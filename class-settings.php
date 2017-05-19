@@ -38,7 +38,7 @@ if ( ! defined( 'WPINC' ) ) { // If this file is called directly.
  * The `WP\Settings` library might be used in the other plugins,
  * so ensure whether the Settings class has not been defined.
  */
-if ( ! class_exists( '\NineCodes\WP\Settings\Settings' ) ) {
+if ( ! class_exists( __NAMESPACE__ . '\Settings' ) ) :
 
 	/**
 	 * Class for registering settings and sections and for display of the settings form(s).
@@ -763,7 +763,7 @@ if ( ! class_exists( '\NineCodes\WP\Settings\Settings' ) ) {
 		 * @since 2.0.0
 		 * @access public
 		 *
-		 * @param array  $args    	Header arguments.
+		 * @param array  $args Header arguments.
 		 * @param string $page_slug Page ID. Manually set the active tab.
 		 * @return void
 		 */
@@ -863,12 +863,12 @@ if ( ! class_exists( '\NineCodes\WP\Settings\Settings' ) ) {
 						),
 					));
 
-					do_action( "before_{$this->screen}_form", $form['id'], $form );
+					do_action( "pre_{$this->screen}_form", $form['id'], $form );
 
 					settings_fields( $this->option_slug . '_' . $form['id'] );
 					do_settings_sections( $this->option_slug . '_' . $form['id'] );
 
-					do_action( "after_{$this->screen}_form", $form['id'], $form );
+					do_action( "{$this->screen}_form", $form['id'], $form );
 
 					$submit = ( isset( $form['submit'] ) && $form['submit'] ) ? $form['submit'] : '';
 
@@ -890,4 +890,4 @@ if ( ! class_exists( '\NineCodes\WP\Settings\Settings' ) ) {
 			}// End if().
 		}
 	}
-} // End if().
+endif; // End if().
